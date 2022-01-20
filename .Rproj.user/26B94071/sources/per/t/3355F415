@@ -1,26 +1,26 @@
 {
-    "id": "AA514424",
-    "path": "~/9_shiny_alura/script.R",
-    "project_path": "script.R",
+    "id": "3355F415",
+    "path": "~/9_shiny_alura/app.R",
+    "project_path": "app.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "151877620",
     "contents": "",
     "dirty": false,
-    "created": 1642716188829.0,
+    "created": 1642716274513.0,
     "source_on_save": false,
-    "relative_order": 1,
+    "relative_order": 2,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "139,115",
-        "scrollLine": "128"
+        "cursorPosition": "9,25",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1642544609,
+    "lastKnownWriteTime": 1642720282,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1642544609,
+    "last_content_update": 1642720282492,
     "read_only": false,
     "read_only_alternatives": []
 }

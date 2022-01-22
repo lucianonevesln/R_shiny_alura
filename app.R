@@ -26,17 +26,16 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Seletor numerico:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+            # criando um grupo de selecao de caixa
+            checkboxGroupInput(inputId = 'select_UF', # identificacao para o output 
+                               label = 'Estados:', # rotulo que aparececar para o usuario
+                               choices = c('Todos', unique(dados$UF)), selected = 'Todos'), # opcoes que aparecerao para o usuario a partir de uma coluna da base de dados
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-           verbatimTextOutput(outputId = 'listaNumeros'), # texto para renderizacao
-           verbatimTextOutput(outputId = 'listaUF'), # texto para renderizacao
+           # verbatimTextOutput(outputId = 'listaNumeros'), # texto para renderizacao
+           # verbatimTextOutput(outputId = 'listaUF'), # texto para renderizacao
            plotlyOutput(outputId = 'data'), # grafico com interatividade
            verbatimTextOutput(outputId = 'descData'), # texto para renderizacao
            plotlyOutput(outputId = 'uf'), # grafico com interatividade
@@ -54,20 +53,20 @@ server <- function(input, output) {
   
   # armazenando retorno em uma variavel em formato de funcao (reactive) e necessita da sequencia de simbolos ()$
   dados_selecionados <- reactive({
-                          # selecionando dados do data frame
-                          dados %>% 
-                            filter(UF %in% c('DF', 'SC', 'GO'))
+                          # aplicando condicao para que o grafico retorne todos os elementos
+                          if (! 'Todos' %in% input$select_UF) {
+                            # selecionando dados do data frame
+                            dados <- dados %>% 
+                                       filter(UF %in% input$select_UF)
+                          }
+                          dados 
+                          
                         })
   
-  # criacao do grafico a ser renderizado
-  output$listaUF <- renderPrint({
-    unique(dados_selecionados()$UF)
-  })
-  
-  # criacao do grafico a ser renderizado
-  output$listaNumeros <- renderPrint({
-      seq(1:input$bins)
-    })
+  # # criacao do grafico a ser renderizado
+  # output$listaUF <- renderPrint({
+  #   unique(dados_selecionados()$UF)
+  # })
   
   # criacao do grafico a ser renderizado
   output$data <- renderPlotly({

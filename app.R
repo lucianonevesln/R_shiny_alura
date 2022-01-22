@@ -14,7 +14,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 
-# importanto dados externos
+# importando dados externos
 dados <- fread('dados_limpos.csv')
 
 # Define UI for application that draws a histogram
@@ -35,10 +35,12 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           verbatimTextOutput(outputId = 'listaNumeros'),
-           verbatimTextOutput(outputId = 'listaUF'),
+           verbatimTextOutput(outputId = 'listaNumeros'), # texto para renderizacao
+           verbatimTextOutput(outputId = 'listaUF'), # texto para renderizacao
            plotlyOutput(outputId = 'data'), # grafico com interatividade
+           verbatimTextOutput(outputId = 'descData'), # texto para renderizacao
            plotlyOutput(outputId = 'uf'), # grafico com interatividade
+           textOutput(outputId = 'descUf'), # texto para renderizacao
            plotlyOutput(outputId = 'atendida'), # grafico com interatividade
            plotlyOutput(outputId = 'atendidaAno') # grafico com interatividade
            # plotOutput(outputId = 'data'), # graficos estaticos
@@ -57,15 +59,17 @@ server <- function(input, output) {
                             filter(UF %in% c('DF', 'SC', 'GO'))
                         })
   
+  # criacao do grafico a ser renderizado
   output$listaUF <- renderPrint({
     unique(dados_selecionados()$UF)
   })
   
+  # criacao do grafico a ser renderizado
   output$listaNumeros <- renderPrint({
       seq(1:input$bins)
     })
   
-  # renderizacao do grafico
+  # criacao do grafico a ser renderizado
   output$data <- renderPlotly({
     ggplotly(
       data.frame(table(as.Date(dados_selecionados()$DataArquivamento))) %>% # gerando um data frame a partir de uma tabela, convertendo data original em formato mais legivel
@@ -80,6 +84,7 @@ server <- function(input, output) {
     )
   })
   
+  # criacao do grafico a ser renderizado
   output$uf <- renderPlotly({
     ggplotly(
       data.frame(table(dados_selecionados()$UF)) %>% # gerando um data frame a partir de uma tabela, baseada no data frame ja utilizado
@@ -93,7 +98,8 @@ server <- function(input, output) {
       tooltip = 'text'
     )
   })
-    
+  
+  # criacao do grafico a ser renderizado  
   output$atendida <- renderPlotly({
     ggplotly(
       ggplot(dados_selecionados()) + 
@@ -105,7 +111,8 @@ server <- function(input, output) {
         ggtitle('Quantidade de Chamados Atendidas') # inserindo um titulo para  grafico
     )
   })
-    
+  
+  # criacao do grafico a ser renderizado  
   output$atendidaAno <- renderPlotly({
     ggplotly(
       data.frame(table(dados_selecionados()$anocalendario, dados_selecionados()$Atendida)) %>% # criando um data frame com duas colunas a partir de uma tabela 
@@ -119,6 +126,21 @@ server <- function(input, output) {
         theme_bw() + # tema definico como branco
         ggtitle('Quantidade de Reclamacoes Atendidas (nao) Por Ano') # define o titulo do grafico
     )
+  })
+  
+  # criacao de texto a ser renderizado
+  output$descData <- renderText ({
+    paste("Grafico com a quantidade de reclamacoes feitas entre:",
+          min(dados_selecionados()$DataAbertura),
+          '-',
+          max(dados_selecionados()$DataAbertura))
+  })
+  
+  # criacao de texto a ser renderizado
+  output$descUf <- renderText({
+    estados <- paste(unique(dados_selecionados()$UF), # criando um texto dinamico e um vetor de valores unicos
+                     collapse = ',') # parametro para apresentar ao usuario em formato texto, cujo separador e a virgula
+    paste('Grafico com a quantidade de reclamacoes feitas pelas UF:', estados) # criando um texto estatico
   })
   
 }

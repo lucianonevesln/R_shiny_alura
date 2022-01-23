@@ -33,7 +33,7 @@ painel_principal <- dashboardBody(
            box(title = 'Filtros', width = '100%',
            column(width = 12, # criando uma coluna
                   box(
-                    width = '100%',
+                    width = '100%', # definindo ocupacao proporcional
                     # criando um grupo de selecao de caixa
                     awesomeCheckboxGroup(inline = TRUE, # dispoe as opcoes em formado de linha
                                          inputId = 'select_UF', # identificacao para o output 
@@ -43,7 +43,7 @@ painel_principal <- dashboardBody(
                     ) ## final box mais interno
                   ), ## final coluna mais interna
            column(width = 6, # criando uma coluna
-                  box(width = '100%',
+                  box(width = '100%', # definindo ocupacao proporcional
                     # criando um range de datas para selecao do usuario
                     dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
                                    label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
@@ -53,7 +53,7 @@ painel_principal <- dashboardBody(
                     ) ## final box mais interno
                   ), ## final coluna mais interna
            column(width = 6, # criando uma coluna
-                  box(width = '100%',
+                  box(width = '100%', # definindo ocupacao proporcional
                       selectizeInput(inputId = 'assunto', # definindo a identificacao que sera usada pela aplicacao
                                      label = 'Descricao Assunto', # definindo o rotulo que aparecera para o usuario
                                      choices = c('Todos', unique(dados$DescricaoAssunto)), # definindo opcoes que aparecerao para o usuario
@@ -64,7 +64,33 @@ painel_principal <- dashboardBody(
                   ) ## final coluna mais interna
               ) ## final box
            ) ## final coluna mais externa
-    ) ## final linha
+    ), ## final linha1
+  fluidRow( # inserindo uma linha fluida na app
+    column(width = 12, # criando uma coluna
+           box(width = '100%', # definindo ocupacao proporcional
+               plotlyOutput(width = '100%', outputId = 'data'), # grafico com interatividade
+               verbatimTextOutput(outputId = 'descData') # texto para renderizacao
+               )
+           )
+    ), ## final linha2
+  fluidRow( # inserindo uma linha fluida na app
+    column(width = 6, # criando uma coluna
+           box(width = '100%', # definindo ocupacao proporcional
+               plotlyOutput(outputId = 'atendida') # grafico com interatividade
+               )),
+    column(width = 6, # criando uma coluna
+           box(width = '100%', # definindo ocupacao proporcional
+               plotlyOutput(outputId = 'atendidaAno') # grafico com interatividade
+               ))
+  ),  ## final linha3
+  fluidRow( # inserindo uma linha fluida na app
+    column(width = 12, # criando uma coluna
+           box(width = '100%', # definindo ocupacao proporcional
+               title = 'Reclamacoes por UF', # definindo titulo do grafico
+               plotlyOutput(outputId = 'uf'), # grafico com interatividade
+               textOutput(outputId = 'descUf') # texto para renderizacao
+               ))
+  ) ## final linha4
 ) ## final dashboardBody
 
 # criando uma estrutura organizada para apresentacao ao usuario

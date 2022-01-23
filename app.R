@@ -13,12 +13,68 @@ library(data.table)
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(shinydashboard)
+library(shinyWidgets)
 
 # importando dados externos
 dados <- fread('dados_limpos.csv')# , encoding = 'UTF-8')
 
+# criando um cabecalho para apresentacao ao usuario
+cabecalho <- dashboardHeader(title = 'Dashboard PROCONs')
+
+# criando uma barra lateral para apresentacao ao usuario
+barra_lateral <- dashboardSidebar(witdh = '250px')
+
+# criando uma area para apresentar o corpo dos retornos para o usuario
+painel_principal <- dashboardBody(
+  fluidRow( # inserindo uma linha fluida na app
+    column(width = 12, # inserindo uma coluna dentro linha
+           # criando uma caixa
+           box(title = 'Filtros', width = '100%',
+           column(width = 12, # criando uma coluna
+                  box(
+                    width = '100%',
+                    # criando um grupo de selecao de caixa
+                    awesomeCheckboxGroup(inline = TRUE, # dispoe as opcoes em formado de linha
+                                         inputId = 'select_UF', # identificacao para o output 
+                                         label = 'Estados:', # rotulo que aparececar para o usuario
+                                         choices = c('Todos', unique(dados$UF)), # opcoes que aparecerao para o usuario a partir de uma coluna da base de dados
+                                         selected = 'Todos') # definindo opcao que aparecera selecioada por padra para o usuario
+                    ) ## final box mais interno
+                  ), ## final coluna mais interna
+           column(width = 6, # criando uma coluna
+                  box(width = '100%',
+                    # criando um range de datas para selecao do usuario
+                    dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
+                                   label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
+                                   format = 'dd-mm-yyyy', # altera o formato de apresentacao padrao para o formato brasileiro
+                                   start = min(as.Date(dados$DataAbertura)), # data inicial que aparecera para o usuario
+                                   end = max(as.Date(dados$DataAbertura)))
+                    ) ## final box mais interno
+                  ), ## final coluna mais interna
+           column(width = 6, # criando uma coluna
+                  box(width = '100%',
+                      selectizeInput(inputId = 'assunto', # definindo a identificacao que sera usada pela aplicacao
+                                     label = 'Descricao Assunto', # definindo o rotulo que aparecera para o usuario
+                                     choices = c('Todos', unique(dados$DescricaoAssunto)), # definindo opcoes que aparecerao para o usuario
+                                     multiple = T, # pemite ao usuario adicionar mais de uma opcao no seletor 
+                                     options = list(maxItems = 5), # definindo o total de opcoes que o usuario podera selecionar
+                                     selected = 'Todos') # definindo a opcao que aparecera selecionada por padrao
+                      ) ## final box mais interno
+                  ) ## final coluna mais interna
+              ) ## final box
+           ) ## final coluna mais externa
+    ) ## final linha
+) ## final dashboardBody
+
+# criando uma estrutura organizada para apresentacao ao usuario
+ui <- dashboardPage(header = cabecalho, # chamando as informacoes armazenadas em variavel
+                    sidebar = barra_lateral, # chamando as informacoes armazenadas em variavel
+                    body = painel_principal) # chamando as informacoes armazenadas em variavel
+
+
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui2 <- fluidPage(
 
     # Application title
     titlePanel("Hello Shiny"),
@@ -68,7 +124,7 @@ server <- function(input, output) {
   
   # armazenando retorno em uma variavel em formato de funcao (reactive) e necessita da sequencia de simbolos ()$
   dados_selecionados <- reactive({
-    # aplicando condicao para que o grafico retorne todos os elementos e/ou elementos selecionados pelo usuario
+                          # aplicando condicao para que o grafico retorne todos os elementos e/ou elementos selecionados pelo usuario
                           if (! 'Todos' %in% input$select_UF) {
                             # selecionando dados do data frame
                             dados <- dados %>% 
@@ -81,9 +137,11 @@ server <- function(input, output) {
                                       filter(DescricaoAssunto %in% input$assunto)
                           }
                           
-                          dados <- dados %>% 
-                                     filter(as.Date(DataAbertura) >= input$data_abertura[1] & # associando a data inicial selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 1 do array
-                                              as.Date(DataAbertura) <= input$data_abertura[2]) # associando a data final selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 2 do array
+                          dados <- dados %>%
+                                            # associando a data inicial selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 1 do array
+                                     filter(as.Date(DataAbertura) >= input$data_abertura[1] & 
+                                            # associando a data final selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 2 do array  
+                                            as.Date(DataAbertura) <= input$data_abertura[2]) 
                           dados 
                           
                         })

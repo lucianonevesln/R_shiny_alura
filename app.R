@@ -30,6 +30,13 @@ ui <- fluidPage(
             checkboxGroupInput(inputId = 'select_UF', # identificacao para o output 
                                label = 'Estados:', # rotulo que aparececar para o usuario
                                choices = c('Todos', unique(dados$UF)), selected = 'Todos'), # opcoes que aparecerao para o usuario a partir de uma coluna da base de dados
+            
+            # criando um range de datas para selecao do usuario
+            dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
+                           label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
+                           format = 'dd-mm-yyyy', # altera o formato de apresentacao padrao para o formato brasileiro
+                           start = min(as.Date(dados$DataAbertura)), # data de inicio que aparecera para o usuario
+                           end = max(as.Date(dados$DataAbertura))) # data final que aparecera para o usuario
         ),
 
         # Show a plot of the generated distribution
@@ -59,6 +66,10 @@ server <- function(input, output) {
                             dados <- dados %>% 
                                        filter(UF %in% input$select_UF)
                           }
+    
+                          dados <- dados %>% 
+                                     filter(as.Date(DataAbertura) >= input$data_abertura[1] & # associando a data inicial selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 1 do array
+                                              as.Date(DataAbertura) <= input$data_abertura[2]) # associando a data final selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 2 do array
                           dados 
                           
                         })

@@ -15,7 +15,7 @@ library(ggplot2)
 library(plotly)
 
 # importando dados externos
-dados <- fread('dados_limpos.csv')
+dados <- fread('dados_limpos.csv')# , encoding = 'UTF-8')
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -35,8 +35,16 @@ ui <- fluidPage(
             dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
                            label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
                            format = 'dd-mm-yyyy', # altera o formato de apresentacao padrao para o formato brasileiro
-                           start = min(as.Date(dados$DataAbertura)), # data de inicio que aparecera para o usuario
-                           end = max(as.Date(dados$DataAbertura))) # data final que aparecera para o usuario
+                           start = min(as.Date(dados$DataAbertura)), # data inicial que aparecera para o usuario
+                           end = max(as.Date(dados$DataAbertura))), # data final que aparecera para o usuario
+            
+            # criando uma selecao de entrada 
+            selectizeInput(inputId = 'assunto', # definindo a identificacao que sera usada pela aplicacao
+                           label = 'Descricao Assunto', # definindo o rotulo que aparecera para o usuario
+                           choices = c('Todos', unique(dados$DescricaoAssunto)), # definindo opcoes que aparecerao para o usuario
+                           multiple = T, # pemite ao usuario adicionar mais de uma opcao no seletor 
+                           options = list(maxItems = 5), # definindo o total de opcoes que o usuario podera selecionar
+                           selected = 'Todos') # definindo a opcao que aparecera selecionada por padrao
         ),
 
         # Show a plot of the generated distribution
@@ -60,13 +68,19 @@ server <- function(input, output) {
   
   # armazenando retorno em uma variavel em formato de funcao (reactive) e necessita da sequencia de simbolos ()$
   dados_selecionados <- reactive({
-                          # aplicando condicao para que o grafico retorne todos os elementos
+    # aplicando condicao para que o grafico retorne todos os elementos e/ou elementos selecionados pelo usuario
                           if (! 'Todos' %in% input$select_UF) {
                             # selecionando dados do data frame
                             dados <- dados %>% 
                                        filter(UF %in% input$select_UF)
                           }
     
+                          # aplicando condicao para que o grafico retorne todos os elementos e/ou elementos selecionados pelo usuario
+                          if (! 'Todos' %in% input$assunto) {
+                            dados <- dados %>% 
+                                      filter(DescricaoAssunto %in% input$assunto)
+                          }
+                          
                           dados <- dados %>% 
                                      filter(as.Date(DataAbertura) >= input$data_abertura[1] & # associando a data inicial selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 1 do array
                                               as.Date(DataAbertura) <= input$data_abertura[2]) # associando a data final selecionada pelo usuario ao retorno que ocorrera no grafico na posicao 2 do array
@@ -87,7 +101,7 @@ server <- function(input, output) {
         ggplot(aes(as.Date(Data), Qtd)) + # definindo eixos x e y
         geom_line(group = 1) + # definindo modelo do grafico
         theme_bw() + # tema definico como branco
-        ggtitle('Quantidade de Reclamacoes por Ano-mes') + # define o titulo do grafico
+        ggtitle('Quantidade de Reclamacoes por Ano-Mes') + # define o titulo do grafico
         theme(axis.text.x = element_text(angle = 45, hjust = 1)) +# define a angulacao do rotulo de datas
         scale_x_date(date_labels = '%b-%Y', breaks = '6 month') +# escala do eixo x como data, com rotulos das datas e quebra de valores
         xlab('Data') # altera o rotulo do eixo x

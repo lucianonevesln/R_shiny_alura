@@ -22,6 +22,6 @@
 
 11 - Criação de elementos de menu lateral no sidebar da página;
 
-12 - Assossição de elementos de sidebar a elementos do body principal da página para apresentação ao usuário;
+12 - Associção de elementos de sidebar a elementos do body principal da página para apresentação ao usuário;
 
 Tecnologia utilizada: linguagem R e algumas de suas bibliotecas

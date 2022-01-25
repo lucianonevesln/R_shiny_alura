@@ -19,6 +19,13 @@ library(shinyWidgets)
 # importando dados externos
 dados <- fread('dados_limpos.csv')# , encoding = 'UTF-8')
 
+# criando uma variavel para armazenar valores de media para apresnetacao em dashboard
+media_chamados_ano <- dados %>% 
+                        group_by(anocalendario) %>% # aplica funcao de agregacao para agrupar conforme coluna escolhida
+                        summarise(qtd_chamados = n()) %>% # cria uma nova coluna para armazenar o numero resultado do group_by
+                        summarise(medias_chamado_ano = mean(qtd_chamados)) %>% # calcula a media a partir da coluna definida na linha acima
+                        as.numeric()
+
 # criando um cabecalho para apresentacao ao usuario
 cabecalho <- dashboardHeader(title = 'Dashboard PROCONs')
 
@@ -27,6 +34,21 @@ barra_lateral <- dashboardSidebar(witdh = '250px')
 
 # criando uma area para apresentar o corpo dos retornos para o usuario
 painel_principal <- dashboardBody(
+  # inseriondo uma caixa com valor, uma com informacoes e outra de output para apresentacao ao usuario
+  fluidRow(
+    valueBox(
+      subtitle = 'Registros', # subtitulo que aparecera abaixo do valor
+      value = nrow(dados), # valor que aparecera para o usuario 
+      icon = icon('database')), # figura do proprio R, que aparecera para o usuario 
+    infoBox(
+      title = '',
+      subtitle = 'Reclamacoes por ano', # subtitulo que aparecera abaixo do valor
+      value = media_chamados_ano, # valor que aparecera para o usuario
+      icon = icon('list')), # figura do proprio R, que aparecera para o usuario
+    valueBoxOutput(
+      outputId = 'qtduf' # id que sera utilizado pela app para identificacao
+    )
+    ),
   fluidRow( # inserindo uma linha fluida na app
     column(width = 12, # inserindo uma coluna dentro linha
            # criando uma caixa
@@ -249,6 +271,13 @@ server <- function(input, output) {
     estados <- paste(unique(dados_selecionados()$UF), # criando um texto dinamico e um vetor de valores unicos
                      collapse = ',') # parametro para apresentar ao usuario em formato texto, cujo separador e a virgula
     paste('Grafico com a quantidade de reclamacoes feitas pelas UF:', estados) # criando um texto estatico
+  })
+  
+  # criando um resumo de valores para apresentacao ao usuario
+  output$qtduf <- renderValueBox({
+    valueBox(value = length(unique(dados_selecionados()$UF)), # definindo funcao de apresentacao, tamanho, unicidade e planilha com coluna da qual sera extraido as informacoes de resumo
+             subtitle = 'UFs Selecionadas', # subtitulo que aparecera abaixo do valor
+             icon = icon('map-marker')) # figura do proprio R, que aparecera para o usuario 
   })
   
 }

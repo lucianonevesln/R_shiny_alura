@@ -19,101 +19,128 @@ library(shinyWidgets)
 # importando dados externos
 dados <- fread('dados_limpos.csv')# , encoding = 'UTF-8')
 
-# criando uma variavel para armazenar valores de media para apresnetacao em dashboard
+# criando uma variavel para armazenar valores de media para apresentacao em dashboard
 media_chamados_ano <- dados %>% 
                         group_by(anocalendario) %>% # aplica funcao de agregacao para agrupar conforme coluna escolhida
                         summarise(qtd_chamados = n()) %>% # cria uma nova coluna para armazenar o numero resultado do group_by
                         summarise(medias_chamado_ano = mean(qtd_chamados)) %>% # calcula a media a partir da coluna definida na linha acima
-                        as.numeric()
+                        as.numeric() # convertendo tudo em tipo numerico
 
 # criando um cabecalho para apresentacao ao usuario
 cabecalho <- dashboardHeader(title = 'Dashboard PROCONs')
 
 # criando uma barra lateral para apresentacao ao usuario
-barra_lateral <- dashboardSidebar(witdh = '250px')
+barra_lateral <- dashboardSidebar(width = '250px', # tamanho da barra lateral
+                                  sidebarMenu( # criando uma menu de barra lateral
+                                    menuItem( # item de menu
+                                      'Dashboard', # nome que aparecera para o usuario
+                                      tabName = 'dashboard', # id de identificacao de elemento
+                                      icon = icon('dashboard')), # figura do proprio R, que aparecera para o usuario   
+                                    menuItem( # item de menu 
+                                      'Informacoes', # nome que aparecera para o usuario
+                                      tabName = 'informacoes', # id de identificacao de elemento
+                                      icon = icon('info-circle') # figura do proprio R, que aparecera para o usuario
+                                    )
+                                  ))
 
 # criando uma area para apresentar o corpo dos retornos para o usuario
 painel_principal <- dashboardBody(
-  # inseriondo uma caixa com valor, uma com informacoes e outra de output para apresentacao ao usuario
-  fluidRow(
-    valueBox(
-      subtitle = 'Registros', # subtitulo que aparecera abaixo do valor
-      value = nrow(dados), # valor que aparecera para o usuario 
-      icon = icon('database')), # figura do proprio R, que aparecera para o usuario 
-    infoBox(
-      title = '',
-      subtitle = 'Reclamacoes por ano', # subtitulo que aparecera abaixo do valor
-      value = media_chamados_ano, # valor que aparecera para o usuario
-      icon = icon('list')), # figura do proprio R, que aparecera para o usuario
-    valueBoxOutput(
-      outputId = 'qtduf' # id que sera utilizado pela app para identificacao
-    )
+  
+  # criando estrutura que ao ser selecionada pelo usuario, apresenta uma nova pagina para ele
+  tabItems(
+    tabItem(
+      tabName = 'informacoes', # id de identificacao de elemento
+      h1('Informacoes'), # nome que aparecera para o usuario
+      infoBox(
+        title = 'Contato', # nome que aparecera para o usuario
+        icon = icon('envelope-square'), # figura do proprio R, que aparecera para o usuario
+        subtitle = 'Para mais informacoes e/ou feedback entre em contato: luciano@email.com') # subtitulo que aparecera abaixo do valor)
     ),
-  fluidRow( # inserindo uma linha fluida na app
-    column(width = 12, # inserindo uma coluna dentro linha
-           # criando uma caixa
-           box(title = 'Filtros', width = '100%',
-           column(width = 12, # criando uma coluna
-                  box(
-                    width = '100%', # definindo ocupacao proporcional
-                    # criando um grupo de selecao de caixa
-                    awesomeCheckboxGroup(inline = TRUE, # dispoe as opcoes em formado de linha
-                                         inputId = 'select_UF', # identificacao para o output 
-                                         label = 'Estados:', # rotulo que aparececar para o usuario
-                                         choices = c('Todos', unique(dados$UF)), # opcoes que aparecerao para o usuario a partir de uma coluna da base de dados
-                                         selected = 'Todos') # definindo opcao que aparecera selecioada por padra para o usuario
-                    ) ## final box mais interno
-                  ), ## final coluna mais interna
-           column(width = 6, # criando uma coluna
-                  box(width = '100%', # definindo ocupacao proporcional
-                    # criando um range de datas para selecao do usuario
-                    dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
-                                   label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
-                                   format = 'dd-mm-yyyy', # altera o formato de apresentacao padrao para o formato brasileiro
-                                   start = min(as.Date(dados$DataAbertura)), # data inicial que aparecera para o usuario
-                                   end = max(as.Date(dados$DataAbertura)))
-                    ) ## final box mais interno
-                  ), ## final coluna mais interna
-           column(width = 6, # criando uma coluna
-                  box(width = '100%', # definindo ocupacao proporcional
-                      selectizeInput(inputId = 'assunto', # definindo a identificacao que sera usada pela aplicacao
-                                     label = 'Descricao Assunto', # definindo o rotulo que aparecera para o usuario
-                                     choices = c('Todos', unique(dados$DescricaoAssunto)), # definindo opcoes que aparecerao para o usuario
-                                     multiple = T, # pemite ao usuario adicionar mais de uma opcao no seletor 
-                                     options = list(maxItems = 5), # definindo o total de opcoes que o usuario podera selecionar
-                                     selected = 'Todos') # definindo a opcao que aparecera selecionada por padrao
-                      ) ## final box mais interno
-                  ) ## final coluna mais interna
-              ) ## final box
-           ) ## final coluna mais externa
-    ), ## final linha1
-  fluidRow( # inserindo uma linha fluida na app
-    column(width = 12, # criando uma coluna
-           box(width = '100%', # definindo ocupacao proporcional
-               plotlyOutput(width = '100%', outputId = 'data'), # grafico com interatividade
-               verbatimTextOutput(outputId = 'descData') # texto para renderizacao
+    tabItem(
+      tabName = 'dashboard',
+      # inseriondo uma caixa com valor, uma com informacoes e outra de output para apresentacao ao usuario
+      fluidRow( # inserindo uma linha fluida na app
+        valueBox(
+          subtitle = 'Registros', # subtitulo que aparecera abaixo do valor
+          value = nrow(dados), # valor que aparecera para o usuario 
+          icon = icon('database')), # figura do proprio R, que aparecera para o usuario 
+        infoBox(
+          title = '',
+          subtitle = 'Reclamacoes por ano', # subtitulo que aparecera abaixo do valor
+          value = media_chamados_ano, # valor que aparecera para o usuario
+          icon = icon('list')), # figura do proprio R, que aparecera para o usuario
+        valueBoxOutput(
+          outputId = 'qtduf' # id que sera utilizado pela app para identificacao
+        )
+      ),
+      fluidRow( # inserindo uma linha fluida na app
+        column(width = 12, # inserindo uma coluna dentro linha
+               # criando uma caixa
+               box(title = 'Filtros', width = '100%',
+                   column(width = 12, # criando uma coluna
+                          box(
+                            width = '100%', # definindo ocupacao proporcional
+                            # criando um grupo de selecao de caixa
+                            awesomeCheckboxGroup(inline = TRUE, # dispoe as opcoes em formado de linha
+                                                 inputId = 'select_UF', # identificacao para o output 
+                                                 label = 'Estados:', # rotulo que aparececar para o usuario
+                                                 choices = c('Todos', unique(dados$UF)), # opcoes que aparecerao para o usuario a partir de uma coluna da base de dados
+                                                 selected = 'Todos') # definindo opcao que aparecera selecioada por padra para o usuario
+                          ) ## final box mais interno
+                   ), ## final coluna mais interna
+                   column(width = 6, # criando uma coluna
+                          box(width = '100%', # definindo ocupacao proporcional
+                              # criando um range de datas para selecao do usuario
+                              dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
+                                             label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
+                                             format = 'dd-mm-yyyy', # altera o formato de apresentacao padrao para o formato brasileiro
+                                             start = min(as.Date(dados$DataAbertura)), # data inicial que aparecera para o usuario
+                                             end = max(as.Date(dados$DataAbertura)))
+                          ) ## final box mais interno
+                   ), ## final coluna mais interna
+                   column(width = 6, # criando uma coluna
+                          box(width = '100%', # definindo ocupacao proporcional
+                              selectizeInput(inputId = 'assunto', # definindo a identificacao que sera usada pela aplicacao
+                                             label = 'Descricao Assunto', # definindo o rotulo que aparecera para o usuario
+                                             choices = c('Todos', unique(dados$DescricaoAssunto)), # definindo opcoes que aparecerao para o usuario
+                                             multiple = T, # pemite ao usuario adicionar mais de uma opcao no seletor 
+                                             options = list(maxItems = 5), # definindo o total de opcoes que o usuario podera selecionar
+                                             selected = 'Todos') # definindo a opcao que aparecera selecionada por padrao
+                          ) ## final box mais interno
+                   ) ## final coluna mais interna
+               ) ## final box
+        ) ## final coluna mais externa
+      ), ## final linha1
+      fluidRow( # inserindo uma linha fluida na app
+        column(width = 12, # criando uma coluna
+               box(width = '100%', # definindo ocupacao proporcional
+                   plotlyOutput(width = '100%', outputId = 'data'), # grafico com interatividade
+                   verbatimTextOutput(outputId = 'descData') # texto para renderizacao
                )
-           )
-    ), ## final linha2
-  fluidRow( # inserindo uma linha fluida na app
-    column(width = 6, # criando uma coluna
-           box(width = '100%', # definindo ocupacao proporcional
-               plotlyOutput(outputId = 'atendida') # grafico com interatividade
+        )
+      ), ## final linha2
+      fluidRow( # inserindo uma linha fluida na app
+        column(width = 6, # criando uma coluna
+               box(width = '100%', # definindo ocupacao proporcional
+                   plotlyOutput(outputId = 'atendida') # grafico com interatividade
                )),
-    column(width = 6, # criando uma coluna
-           box(width = '100%', # definindo ocupacao proporcional
-               plotlyOutput(outputId = 'atendidaAno') # grafico com interatividade
+        column(width = 6, # criando uma coluna
+               box(width = '100%', # definindo ocupacao proporcional
+                   plotlyOutput(outputId = 'atendidaAno') # grafico com interatividade
                ))
-  ),  ## final linha3
-  fluidRow( # inserindo uma linha fluida na app
-    column(width = 12, # criando uma coluna
-           box(width = '100%', # definindo ocupacao proporcional
-               title = 'Reclamacoes por UF', # definindo titulo do grafico
-               plotlyOutput(outputId = 'uf'), # grafico com interatividade
-               textOutput(outputId = 'descUf') # texto para renderizacao
+      ),  ## final linha3
+      fluidRow( # inserindo uma linha fluida na app
+        column(width = 12, # criando uma coluna
+               box(width = '100%', # definindo ocupacao proporcional
+                   title = 'Reclamacoes por UF', # definindo titulo do grafico
+                   plotlyOutput(outputId = 'uf'), # grafico com interatividade
+                   textOutput(outputId = 'descUf') # texto para renderizacao
                ))
-  ) ## final linha4
-) ## final dashboardBody
+      ) ## final linha4
+    ) ## final dashboardBody
+      
+    )
+  ) ## fim tabitems
 
 # criando uma estrutura organizada para apresentacao ao usuario
 ui <- dashboardPage(header = cabecalho, # chamando as informacoes armazenadas em variavel

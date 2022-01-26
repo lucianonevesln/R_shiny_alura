@@ -31,7 +31,7 @@ cabecalho <- dashboardHeader(title = 'Dashboard PROCONs')
 
 # criando uma barra lateral para apresentacao ao usuario
 barra_lateral <- dashboardSidebar(width = '250px', # tamanho da barra lateral
-                                  sidebarMenu( # criando uma menu de barra lateral
+                                  sidebarMenu( # criando um menu de barra lateral
                                     menuItem( # item de menu
                                       'Dashboard', # nome que aparecera para o usuario
                                       tabName = 'dashboard', # id de identificacao de elemento
@@ -85,7 +85,7 @@ painel_principal <- dashboardBody(
                                                  inputId = 'select_UF', # identificacao para o output 
                                                  label = 'Estados:', # rotulo que aparececar para o usuario
                                                  choices = c('Todos', unique(dados$UF)), # opcoes que aparecerao para o usuario a partir de uma coluna da base de dados
-                                                 selected = 'Todos') # definindo opcao que aparecera selecioada por padra para o usuario
+                                                 selected = 'Todos') # definindo opcao que aparecera selecioada por padrao para o usuario
                           ) ## final box mais interno
                    ), ## final coluna mais interna
                    column(width = 6, # criando uma coluna
@@ -93,9 +93,9 @@ painel_principal <- dashboardBody(
                               # criando um range de datas para selecao do usuario
                               dateRangeInput(inputId = 'data_abertura', # determina o id que sera usado pela app para identificacao
                                              label = 'Data Abertura:', # rotulo de identificacao que aparecera para o usuario
-                                             format = 'dd-mm-yyyy', # altera o formato de apresentacao padrao para o formato brasileiro
+                                             format = 'dd-mm-yyyy', # altera o formato de data de apresentacao padrao para o formato brasileiro
                                              start = min(as.Date(dados$DataAbertura)), # data inicial que aparecera para o usuario
-                                             end = max(as.Date(dados$DataAbertura)))
+                                             end = max(as.Date(dados$DataAbertura))) # data final que aparecera para o usuario
                           ) ## final box mais interno
                    ), ## final coluna mais interna
                    column(width = 6, # criando uma coluna
